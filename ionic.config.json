@@ -1,0 +1,7 @@
+{
+  "name": "online-course-helper-app",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular"
+}

@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      学生控制
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <div style="display: flex">
+    <ion-label>课程：{{course}}</ion-label>
+  </div>
+  <hr>
+  <!-- <div style="display: flex">
+      <ion-label>当前可报名学生：{{numberOfUnsignedRobots}}/{{numberOfSignedRobots}}</ion-label>
+      <button ion-button (click)="studentsSign()" [disabled]='buttonSignDisabled'>学生报名</button>
+    </div>
+    <hr> -->
+  <div style="display: flex;">
+    <ion-label>当前可听课学生：{{numberOfSignedRobots}}/{{numberOfEnteredRobots}}</ion-label>
+    <ion-button (click)="studentsEnter()">进入教室</ion-button>
+  </div>
+  <hr>
+  <div style="display: flex;">
+    <ion-button (click)="interactionsClick()">学生互动</ion-button>
+    <ion-button (click)="questionsClick()">学生提问</ion-button>
+    <div style="flex: 1;"></div>
+    <ion-button color="danger" (click)="leaveClick()">学生离开</ion-button>
+  </div>
+</ion-content>
