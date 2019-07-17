@@ -20,13 +20,13 @@ export class CoursesPage implements OnInit {
 
   itemSelected(item: string) {
     console.log("Selected Item", item)
-    this.router.navigate(['/students'])
+    this.router.navigate(['students'],{queryParams:{course:item}})
   }
 
   async addClick() {
     let m = await this.modalController.create({component:TitlePage})
     await m.present()
-    let res = await m.onDidDismiss()   
+    let res = await m.onDidDismiss()
     if (res.data != null) {
       console.log(res.data)
       this.items.push(res.data)

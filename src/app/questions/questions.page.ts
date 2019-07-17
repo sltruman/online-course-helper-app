@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular'
 import { Storage } from '@ionic/storage'
 import { HttpClient } from "@angular/common/http"
+import { TitlePage } from '../title/title.page'
 import { API } from '../api-def'
-import { TitlePage } from '../title/title.page';
+
 
 @Component({
   selector: 'app-questions',
@@ -15,29 +16,13 @@ export class QuestionsPage implements OnInit {
 
   ]
 
-  constructor(public http: HttpClient, public modal: ModalController, public storage: Storage) {
-    storage.get('questions').then(items => this.items = items == null ? [] : items)
+  constructor(public http: HttpClient, public modal: ModalController, public storage: Storage) {}
+
+  async ngOnInit() {
+    this.items = await this.storage.get('questions')
   }
 
-  ngOnInit() {
-  }
-
-  ionViewDidLeave() {
-    this.storage.get('questions').then(items => {
-      if (this.items.toString() == items.toString()) return
-      this.storage.set('questions', this.items)
-    })
-  }
-
-  itemSelected(item: string) {
-    console.log("Selected Item", item)
-    this.http.get(API.Say, { params: { msg: item } })
-      .subscribe(res => {
-        console.log(res)
-      }, err => {
-        console.error(err)
-      })
-  }
+  ionViewDidLeave() {}
 
   async addClick() {
     let m = await this.modal.create({component:TitlePage})
@@ -45,9 +30,11 @@ export class QuestionsPage implements OnInit {
     let ret = await m.onDidDismiss()
     let name = ret.data
     if (name != null) this.items.push(name)
+    this.storage.set('questions', this.items)
   }
 
   remove(item) {
     this.items.splice(this.items.indexOf(item), 1)
+    this.storage.set('questions', this.items)
   }
 }

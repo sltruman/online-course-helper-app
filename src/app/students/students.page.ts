@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core'
-import { ActivatedRoute,Router } from '@angular/router'
+import { ActivatedRoute, Router } from '@angular/router'
 import { HttpClient } from "@angular/common/http"
+import { ModalController } from '@ionic/angular';
+import { Storage } from '@ionic/storage';
+import { TitlePage } from '../title/title.page'
 import { API } from '../api-def'
 
 @Component({
@@ -9,98 +12,99 @@ import { API } from '../api-def'
   styleUrls: ['./students.page.scss'],
 })
 export class StudentsPage implements OnInit {
+  students = []
+  items = []
   course: string
-  numberOfUnsignedRobots: number = 0
-  numberOfSignedRobots: number = 0
-  numberOfEnteredRobots: number = 0
-  timer = true
-  buttonSignDisabled: boolean = false
   buttonEnteredDisabled: boolean = false
   buttonLeaveDisabled: boolean = true
+  numberOfEnteredRobots = 0
 
   constructor(
+    public storage: Storage,
     public router: Router,
-    public http: HttpClient) {
-    
-    console.log(this.course)
+    public http: HttpClient,
+    public modalController: ModalController,
+    public activeRoute: ActivatedRoute) {
+    activeRoute.queryParams.subscribe(params => {
+      this.course = params.course
+    })
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+    this.students = await this.storage.get('students')
+    for (let s of this.students) this.items.push({ status: '学生离线', text: s })
+    this.numberOfEnteredRobots = this.students.length
   }
 
-  ionViewWillEnter() {
-    console.log('enter page')
+  updateStatus = () => {
+    this.items.splice(this.students.length - 1, this.items.length - this.students.length)
 
-    var setNumberOfRobots = () => {
-      this.http.get(API.NumberOfRobotsOfStatus)
-        .subscribe(res => {
-          console.log(res)
-          this.numberOfUnsignedRobots = res['ret']['unsigned']
-          this.numberOfSignedRobots = res['ret']['signed']
-          this.numberOfEnteredRobots = res['ret']['entered']
-        }, err => {
-          console.error(err)
-        })
-
-      if (this.timer) setTimeout(setNumberOfRobots, 5000)
+    for (let i = 0; i < this.students.length; i++) {
+      this.http.get(API.getStudentStatus, { params: { account: this.students[i].split('-')[0] } }).subscribe(res => {
+        let item = { status: res['err'] ? '接口错误' : res['ret'], text: this.students[i] }
+        if (i < this.items.length) this.items[i] = item
+        else this.items.push(item)
+      }, err => {
+        let item = { status: '网络错误', text: this.students[i] }
+        if (i < this.items.length) this.items[i] = item
+        else this.items.push(item)
+      })
     }
 
-    setTimeout(setNumberOfRobots, 5000)
-    this.timer = true
+    if (this.timer) setTimeout(this.updateStatus, 10000)
   }
 
-  ionViewWillLeave() {
-    console.log('leave page')
-    this.timer = false
-  }
-
-
-  studentsSign() {
-    this.http.get(API.Sign, {
-      params: { course: this.course }
+  timer = null
+  async enterClick() {
+    clearTimeout(this.timer)
+    let accounts = []
+    for (let s of this.students) accounts.push(s.split(':'))
+    this.http.post(API.putOnlineCourseTask, {
+      params: {
+        course: this.course,
+        accounts: accounts,
+        interactions: await this.storage.get('interactions'),
+        questions: await this.storage.get('questions')
+      }
     }).subscribe(res => {
-      console.log(res)
+      alert(res['ret'])
+      this.timer = setTimeout(this.updateStatus)
     }, err => {
-      console.log(err)
+      alert('网络错误')
     })
-
-    this.buttonSignDisabled = true
-  }
-
-  studentsEnter() {
-    this.http.get(API.Enter, {//Get number of robots of available
-      params: { course: this.course }
-    }).subscribe(res => {
-      console.log(res)
-    }, err => {
-      console.log(err)
-    })
-
-    this.buttonEnteredDisabled = true
-    this.buttonLeaveDisabled = false
-  }
-
-  interactionsClick() {
-    this.router.navigate(['/InteractionsPage'])
-  }
-
-  questionsClick() {
-    this.router.navigate(['/QuestionsPage'])
   }
 
   leaveClick() {
-    if (!confirm('让学生离开课堂吗?'))
-      return
+    clearTimeout(this.timer)
+    this.timer = null
+  }
 
-    this.http.get(API.Leave, {//Get number of robots of available
-      params: { course: this.course }
-    }).subscribe(res => {
-      console.log(res)
-      this.buttonLeaveDisabled = true
-      this.buttonSignDisabled = false
-    }, err => {
-      console.error(err)
-      alert('网络出现延时，请重试。')
-    })
+  async addClick() {
+    let m = await this.modalController.create({ component: TitlePage })
+    await m.present()
+    let ret = await m.onDidDismiss()
+    let value = ret.data
+    if (value != null) {
+      this.items.push({ status: '学生离线', text: value })
+      this.students.push(value)
+      await this.storage.set('students', this.students)
+      this.numberOfEnteredRobots = this.students.length
+    }
+  }
+
+  async removeClick(item) {
+    let i = this.students.indexOf(item)
+    this.students.splice(i, 1)
+    await this.storage.set('students', this.students)
+    this.items.splice(i, 1)
+    this.numberOfEnteredRobots = this.students.length
+  }
+
+  interactionsClick() {
+    this.router.navigate(['/interactions'])
+  }
+
+  questionsClick() {
+    this.router.navigate(['/questions'])
   }
 }

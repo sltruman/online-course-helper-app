@@ -6,28 +6,39 @@
     <ion-title>
       学生控制
     </ion-title>
+    <ion-buttons slot="end">
+        <ion-button slot="icon-only" color="royal" (click)="addClick()">
+          <ion-icon name="add"></ion-icon>
+        </ion-button>
+      </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content padding>
   <div style="display: flex">
-    <ion-label>课程：{{course}}</ion-label>
+        <h5>课程：{{course}}</h5>
   </div>
-  <hr>
-  <!-- <div style="display: flex">
-      <ion-label>当前可报名学生：{{numberOfUnsignedRobots}}/{{numberOfSignedRobots}}</ion-label>
-      <button ion-button (click)="studentsSign()" [disabled]='buttonSignDisabled'>学生报名</button>
-    </div>
-    <hr> -->
   <div style="display: flex;">
-    <ion-label>当前可听课学生：{{numberOfSignedRobots}}/{{numberOfEnteredRobots}}</ion-label>
-    <ion-button (click)="studentsEnter()">进入教室</ion-button>
+    <h5>当前可听课学生：{{numberOfEnteredRobots}}</h5>
+    <div style="flex: 1;"></div>
+    <div style="flex: 1;"></div>
+    <ion-button (click)="enterClick()">进入教室</ion-button>
   </div>
-  <hr>
+
   <div style="display: flex;">
     <ion-button (click)="interactionsClick()">学生互动</ion-button>
     <ion-button (click)="questionsClick()">学生提问</ion-button>
     <div style="flex: 1;"></div>
     <ion-button color="danger" (click)="leaveClick()">学生离开</ion-button>
   </div>
+  <ion-list>
+      <ion-item-sliding *ngFor="let item of items">
+          <ion-item>
+            <h5><ion-text color="primary">{{ item.status }}:</ion-text>{{ item.text }}</h5>
+          </ion-item>
+          <ion-item-options side="end">
+            <ion-button (click)="removeClick(item.text)" color="danger">移除</ion-button>
+          </ion-item-options>
+        </ion-item-sliding>
+  </ion-list>
 </ion-content>

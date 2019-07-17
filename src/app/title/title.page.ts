@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, Input } from '@angular/core';
-import { ModalController, NavParams, IonButton, IonInput } from '@ionic/angular';
+import { ModalController, IonButton, IonInput } from '@ionic/angular';
 
 @Component({
   selector: 'app-title',
@@ -12,14 +12,9 @@ export class TitlePage implements OnInit {
   @ViewChild('buttonOk') buttonOk: IonButton
   buttonOkDisabled: boolean
   
-  constructor(private modelCtrl: ModalController, private navParams: NavParams) { 
-    console.log(navParams.get('firstName'))
-  }
+  constructor(private modelCtrl: ModalController) {}
 
   ngOnInit() {}
-
-  ionViewDidLoad() {}
-
   inputNameOnChange() {
     if (0 < this.inputName.value.length) {
       this.buttonOkDisabled = false

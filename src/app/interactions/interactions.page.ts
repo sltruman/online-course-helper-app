@@ -22,29 +22,7 @@ export class InteractionsPage implements OnInit {
   ngOnInit() {
   }
 
-  ionViewDidLeave() {
-    this.storage.get('interactions').then(items => {
-      if (this.items.toString() == items.toString()) return
-      this.http.get(API.SaySomething, { params: { items: this.items } })
-        .subscribe(res => {
-          console.log(res)
-          this.storage.set('interactions', this.items)
-        }, err => {
-          console.error(err)
-          alert('上传数据失败。')
-        })
-    })
-  }
-
-  itemSelected(item: string) {
-    console.log("Selected Item", item)
-    this.http.get(API.Say, { params: { msg: item } })
-      .subscribe(res => {
-        console.log(res)
-      }, err => {
-        console.error(err)
-      })
-  }
+  ionViewDidLeave() {}
 
   async addClick() {
     let m = await this.modal.create({component:TitlePage})
@@ -52,9 +30,11 @@ export class InteractionsPage implements OnInit {
     let ret = await m.onDidDismiss()
     let name = ret.data
     if (name != null) this.items.push(name)
+    this.storage.set('interactions', this.items)
   }
 
   remove(item) {
     this.items.splice(this.items.indexOf(item), 1)
+    this.storage.set('interactions', this.items)
   }
 }
