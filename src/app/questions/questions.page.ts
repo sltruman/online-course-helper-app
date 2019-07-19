@@ -16,10 +16,10 @@ export class QuestionsPage implements OnInit {
 
   ]
 
-  constructor(public http: HttpClient, public modal: ModalController, public storage: Storage) {}
+  constructor(public http: HttpClient, public modal: ModalController, public storage: Storage) { }
 
-  async ngOnInit() {
-    this.items = await this.storage.get('questions')
+  ngOnInit() {
+    this.storage.get('questions').then(items => this.items = items == null ? [] : items)
   }
 
   ionViewDidLeave() {}

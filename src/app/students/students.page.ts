@@ -29,10 +29,11 @@ export class StudentsPage implements OnInit {
     activeRoute.queryParams.subscribe(params => {
       this.course = params.course
     })
+   
   }
 
   async ngOnInit() {
-    this.students = await this.storage.get('students')
+    this.students = await this.storage.get('students'); this.students = this.students ? this.students : []
     for (let s of this.students) this.items.push({ status: '学生离线', text: s })
     this.numberOfEnteredRobots = this.students.length
   }

@@ -15,11 +15,10 @@ export class InteractionsPage implements OnInit {
 
   ]
 
-  constructor(public http: HttpClient,public modal: ModalController, public storage: Storage) {
-    storage.get('interactions').then(items => this.items = items == null ? [] : items)
-  }
+  constructor(public http: HttpClient,public modal: ModalController, public storage: Storage) { }
 
   ngOnInit() {
+    this.storage.get('interactions').then(items => this.items = items == null ? [] : items)
   }
 
   ionViewDidLeave() {}
