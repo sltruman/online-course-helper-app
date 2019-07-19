@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
-import { HttpClient } from "@angular/common/http"
+import { HttpClient, HttpHeaders } from "@angular/common/http"
 import { ModalController } from '@ionic/angular';
 import { Storage } from '@ionic/storage';
 import { TitlePage } from '../title/title.page'
 import { API } from '../api-def'
+import { stringify } from 'querystring';
 
 @Component({
   selector: 'app-students',
@@ -40,8 +41,8 @@ export class StudentsPage implements OnInit {
     this.items.splice(this.students.length - 1, this.items.length - this.students.length)
 
     for (let i = 0; i < this.students.length; i++) {
-      this.http.get(API.getStudentStatus, { params: { account: this.students[i].split('-')[0] } }).subscribe(res => {
-        let item = { status: res['err'] ? '接口错误' : res['ret'], text: this.students[i] }
+      this.http.get(API.getStudentStatus, { params: { account: this.students[i].split(':')[0] } }).subscribe(res => {
+        let item = { status: res['err'] ? '接口错误' : res['ret'] ? res['ret'] : '学生离线' , text: this.students[i] }
         if (i < this.items.length) this.items[i] = item
         else this.items.push(item)
       }, err => {
@@ -59,18 +60,17 @@ export class StudentsPage implements OnInit {
     clearTimeout(this.timer)
     let accounts = []
     for (let s of this.students) accounts.push(s.split(':'))
-    this.http.post(API.putOnlineCourseTask, {
-      params: {
-        course: this.course,
-        accounts: accounts,
-        interactions: await this.storage.get('interactions'),
-        questions: await this.storage.get('questions')
-      }
-    }).subscribe(res => {
-      alert(res['ret'])
+    this.http.post(API.putCourseTask, {
+      course: this.course,
+      accounts: accounts,
+      interactions: await this.storage.get('interactions'),
+      questions: await this.storage.get('questions')
+    }, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).subscribe(res => {
+      if(!res['ret']) return;
+      alert('命令已发送！')
       this.timer = setTimeout(this.updateStatus)
     }, err => {
-      alert('网络错误')
+      console.error(err)
     })
   }
 
